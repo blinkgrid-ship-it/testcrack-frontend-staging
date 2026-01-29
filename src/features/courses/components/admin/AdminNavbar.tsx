@@ -6,7 +6,10 @@ import {
   LogOut, 
   Bell,
   GraduationCap,
-  ChevronLeft
+  ChevronLeft,
+  Home,
+  Globe,
+  ChevronDown
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
@@ -23,90 +26,142 @@ export const AdminNavbar = () => {
   const activeTab = navItems.find(item => item.route === location.pathname)?.id || "dashboard";
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo & Section Title */}
-          <div className="flex items-center space-x-10">
-            <button
-              onClick={() => navigate("/")}
-              className="flex flex-col items-start hover:opacity-80 transition-opacity group"
-            >
-              <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                TestCrack
+    <>
+      {/* Sidebar */}
+      <aside className="w-64 bg-white border-r border-gray-200 min-h-screen fixed left-0 top-0 flex flex-col z-50">
+        {/* Logo */}
+        <div className="p-6 border-b border-gray-200">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <GraduationCap className="h-6 w-6 text-white" />
+            </div>
+            <div className="text-left">
+              <span className="block text-sm font-bold text-gray-900">
+                TESTCRACK
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400 -mt-1 group-hover:text-indigo-500 transition-colors">
+              <span className="block text-xs text-gray-500 uppercase tracking-wide">
                 Instructor
               </span>
-            </button>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
-              {navItems.map((item) => (
-                <Button
-                  key={item.id}
-                  variant="ghost"
-                  onClick={() => navigate(item.route)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                    activeTab === item.id 
-                      ? "text-indigo-600 bg-indigo-50/50" 
-                      : "text-gray-500 hover:text-indigo-600 hover:bg-gray-50 font-medium"
-                  }`}
-                >
-                  <item.icon className={`h-4 w-4 ${activeTab === item.id ? "text-indigo-600" : "text-gray-400"}`} />
-                  <span>{item.label}</span>
-                </Button>
-              ))}
             </div>
-          </div>
+          </button>
+        </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="hidden lg:flex items-center space-x-2 border-gray-200 text-gray-600 hover:bg-gray-50"
-              onClick={() => navigate("/courses")}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Student View</span>
-            </Button>
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            
+            return (
+              <Button
+                key={item.id}
+                variant="ghost"
+                onClick={() => navigate(item.route)}
+                className={`w-full justify-start space-x-3 h-12 rounded-lg ${
+                  isActive 
+                    ? "bg-indigo-600 text-white hover:bg-indigo-700" 
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="font-medium text-sm">{item.label}</span>
+              </Button>
+            );
+          })}
+        </nav>
 
-            <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-indigo-600">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </Button>
-
-            <div className="h-6 w-px bg-gray-200 mx-1"></div>
-
-            <div className="flex items-center space-x-3 pl-2">
-                <div className="hidden lg:block text-right">
-                    <p className="text-sm font-bold text-gray-900 leading-tight">{user?.email?.split('@')[0] || "Instructor"}</p>
-                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter mt-0.5">Pro Mentor</p>
-                </div>
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="p-0 hover:bg-transparent"
-                    onClick={() => navigate("/profile")}
-                >
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md transition-transform hover:scale-105 active:scale-95">
-                        {user?.email?.[0].toUpperCase() || "I"}
-                    </div>
-                </Button>
-            </div>
-
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={signOut}
-                className="text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors rounded-xl"
-            >
-                <LogOut className="h-5 w-5" />
-            </Button>
+        {/* Footer Icon */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <GraduationCap className="h-5 w-5 text-white" />
           </div>
         </div>
-      </div>
-    </nav>
+      </aside>
+
+      {/* Top Header */}
+      <header className="h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-64 z-40 flex items-center justify-between px-6">
+        <h2 className="text-xl font-bold text-gray-900">Dashboard</h2>
+
+        <div className="flex items-center space-x-4">
+          {/* Home Icon */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-gray-600 hover:bg-gray-100 rounded-lg"
+            onClick={() => navigate("/")}
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+
+          {/* Language Selector */}
+          <Button 
+            variant="ghost" 
+            className="text-gray-600 hover:bg-gray-100 rounded-lg space-x-2"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="text-sm">English</span>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+
+          {/* Student View Button */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="hidden lg:flex items-center space-x-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            onClick={() => navigate("/courses")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Student View</span>
+          </Button>
+
+          {/* Notifications */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+          </Button>
+
+          {/* User Profile */}
+          <div className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className="hidden lg:block text-right">
+              <p className="text-sm font-medium text-gray-900 leading-tight">
+                {user?.email?.split('@')[0] || "Instructor"}
+              </p>
+              <p className="text-xs text-indigo-600 font-medium">
+                Pro Mentor
+              </p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="p-0 hover:bg-transparent"
+              onClick={() => navigate("/profile")}
+            >
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                {user?.email?.[0].toUpperCase() || "I"}
+              </div>
+            </Button>
+            <ChevronDown className="h-4 w-4 text-gray-600" />
+          </div>
+
+          {/* Logout */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={signOut}
+            className="text-gray-600 hover:text-red-500 hover:bg-red-50 transition-colors rounded-lg"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
+    </>
   );
 };

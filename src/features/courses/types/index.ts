@@ -66,6 +66,7 @@ export interface CourseDetail {
   enrollment?: {
     status: ProgressStatus;
     progress_percent: number;
+    completed_at?: string | null; // <--- ADDED THIS LINE
   };
   _count?: {
     CourseModule: number;

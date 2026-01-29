@@ -72,28 +72,25 @@ const AdminDashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      <div className="fixed inset-0 bg-gradient-to-tr from-indigo-50/20 via-white to-purple-50/20 pointer-events-none" />
-      
+    <div className="min-h-screen bg-gray-50">
       <AdminNavbar />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 relative z-10">
+      <main className="ml-64 mt-16 p-8">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">
               Instructor Dashboard
-              <Sparkles className="h-6 w-6 ml-3 text-indigo-500 animate-pulse" />
             </h1>
-            <p className="text-slate-500 font-medium text-lg">
+            <p className="text-gray-600">
               Empower your students with world-class content and insights.
             </p>
           </div>
           <Button 
-            size="lg" 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200 h-14 px-8 rounded-2xl font-bold text-base transition-all hover:-translate-y-1 active:translate-y-0 active:shadow-md"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-colors"
           >
-            <Plus className="mr-2 h-5 w-5 stroke-[3px]" /> Create New Course
+            <Plus className="h-5 w-5" />
+            <span>Create New Course</span>
           </Button>
         </div>
 
@@ -101,53 +98,50 @@ const AdminDashboardPage = () => {
         <AdminStats />
 
         {/* Courses Management Section */}
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/50 backdrop-blur-sm">
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+        <div className="mt-8">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+              <div className="flex items-center space-x-4 w-full lg:w-auto">
                 <div className="flex items-center space-x-2">
-                    <h2 className="text-xl font-black text-slate-800 whitespace-nowrap">My Courses</h2>
-                    <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">{mockCourses.length}</span>
+                  <h2 className="text-xl font-bold text-gray-900 whitespace-nowrap">My Courses</h2>
+                  <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-full">{mockCourses.length}</span>
                 </div>
                 
-                <div className="h-8 w-px bg-slate-100 hidden sm:block"></div>
+                <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
 
-                <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <div className="relative w-full sm:w-72 group">
-                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                        <Input 
-                            placeholder="Search projects..." 
-                            className="pl-11 h-11 bg-slate-50/50 border-slate-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-sm font-medium transition-all"
-                        />
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl bg-slate-50/50 border border-slate-100 text-slate-500 hover:bg-white hover:text-indigo-600 transition-all">
-                        <Filter className="h-4 w-4" />
-                    </Button>
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                      placeholder="Search projects..." 
+                      className="pl-10 h-11 border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+                    <Filter className="h-4 w-4" />
+                  </Button>
                 </div>
+              </div>
+              
+              <Tabs defaultValue="all" className="w-full lg:w-auto">
+                <TabsList className="grid w-full grid-cols-3 lg:w-[320px] h-11 p-1 bg-gray-100 rounded-lg">
+                  <TabsTrigger value="all" className="rounded-md text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">All</TabsTrigger>
+                  <TabsTrigger value="published" className="rounded-md text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Published</TabsTrigger>
+                  <TabsTrigger value="draft" className="rounded-md text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Drafts</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-            
-            <Tabs defaultValue="all" className="w-full lg:w-auto">
-              <TabsList className="grid w-full grid-cols-3 lg:w-[320px] h-11 p-1 bg-slate-100/50 rounded-xl border border-slate-100">
-                <TabsTrigger value="all" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">All</TabsTrigger>
-                <TabsTrigger value="published" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Published</TabsTrigger>
-                <TabsTrigger value="draft" className="rounded-lg text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Drafts</TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mockCourses.map((course, index) => (
-              <div 
-                key={course.id} 
-                className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-backwards"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <AdminCourseCard 
-                  course={course}
-                  onEdit={handleEdit}
-                  onView={handleView}
-                  onDelete={handleDelete}
-                />
-              </div>
+              <AdminCourseCard 
+                key={course.id}
+                course={course}
+                onEdit={handleEdit}
+                onView={handleView}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         </div>

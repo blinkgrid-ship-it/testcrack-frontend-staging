@@ -42,7 +42,7 @@
 }
 
 .enhanced-markdown li {
-  @apply ml-2 pl-3 border-l-3 border-purple-300 text-gray-700;
+  @apply ml-2 pl-3 border-l-4 border-purple-300 text-gray-700;
   position: relative;
 }
 

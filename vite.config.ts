@@ -23,12 +23,47 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  
+  // ===== OPTIMIZED BUILD SETTINGS =====
+  build: {
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production', // Remove console.logs in production
+        drop_debugger: true,
+      },
+    },
+    
+    // Optimize chunk splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['lucide-react', '@radix-ui/react-toast', '@radix-ui/react-tooltip'],
+          'gsap-vendor': ['gsap'],
+          'query-vendor': ['@tanstack/react-query'],
+        },
+      },
+    },
+    
+    // Increase chunk size warning limit (optional)
+    chunkSizeWarningLimit: 1000,
+    
+    // Enable source maps only in dev
+    sourcemap: mode === 'development',
+  },
+  
+  // ===== OPTIMIZED CSS SETTINGS =====
+  css: {
+    devSourcemap: mode === 'development',
   },
 }));
