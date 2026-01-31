@@ -66,7 +66,6 @@ export interface CourseDetail {
   enrollment?: {
     status: ProgressStatus;
     progress_percent: number;
-    completed_at?: string | null; // <--- ADDED THIS LINE
   };
   _count?: {
     CourseModule: number;
@@ -83,6 +82,34 @@ export interface CoursesResponse {
     totalPages: number;
     hasMore: boolean;
   };
+}
+
+export interface InstructorCoursesResponse {
+  data: Course[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface InstructorCoursesFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  is_published?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface CreateCourseRequest {
+  title: string;
+  description?: string;
+  domainId: string;
+  difficulty?: DifficultyType;
+  price?: number;
+  duration_minutes?: number;
 }
 
 export interface CourseDetailResponse {
@@ -114,6 +141,127 @@ export interface UserCourseEnrollment {
   status: ProgressStatus | null;
   progress_percent: number | null;
   enrolled_at: string | null;
+}
+
+// Module Management Types
+export interface CourseModuleData {
+  id: string;
+  title: string;
+  description: string | null;
+  domain: string | null;
+  order_index: number;
+  courseModuleId: string;
+  conceptCount: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface ModuleListResponse {
+  data: CourseModuleData[];
+  meta: { total: number };
+}
+
+export interface ModuleResponse {
+  message: string;
+  data: CourseModuleData;
+}
+
+export interface CreateModuleRequest {
+  title: string;
+  description?: string;
+  domain?: string;
+  order_index?: number;
+}
+
+export interface UpdateModuleRequest {
+  title?: string;
+  description?: string;
+  domain?: string;
+  order_index?: number;
+}
+
+export interface DeleteModuleResponse {
+  message: string;
+  moduleDeleted: boolean;
+}
+
+// Content Management Types
+
+export enum ContentType {
+  NOTES = 'NOTES',
+  MCQ = 'MCQ'
+}
+
+export interface MCQOption {
+  id: string;
+  text: string;
+}
+
+export interface NoteData {
+  id: string;
+  body: string;
+  format: string;
+  version: number;
+}
+
+export interface MCQData {
+  id: string;
+  question: string;
+  options: MCQOption[];
+  correct_answer: string;
+  explanation: string | null;
+  difficulty: string;
+}
+
+export interface ContentItem {
+  index: number;
+  id: string;
+  type: ContentType;
+  title: string | null;
+  is_required: boolean | null;
+  concept_order: number;
+  sequence_order: number | null;
+  concept: {
+    id: string;
+    slug: string;
+    learningObjective: string;
+    keywords: string[];
+    domain: string;
+    baseConceptId: string;
+  };
+  content: NoteData | MCQData;
+}
+
+export interface CreateContentRequest {
+  type: ContentType;
+  title: string;
+  sequence_order?: number;
+  is_required?: boolean;
+  // Note specific
+  body?: string;
+  // MCQ specific
+  question?: string;
+  options?: Record<string, string>; // Sending as simple object/map
+  correct_answer?: string;
+  explanation?: string;
+  difficulty?: string;
+}
+
+export interface UpdateContentRequest {
+  title?: string;
+  sequence_order?: number;
+  is_required?: boolean;
+  body?: string;
+  question?: string;
+  options?: Record<string, string>;
+  correct_answer?: string;
+  explanation?: string;
+  difficulty?: string;
+}
+
+export interface ContentResponse {
+  message: string;
+  data: any;
 }
 
 export * from './learning';

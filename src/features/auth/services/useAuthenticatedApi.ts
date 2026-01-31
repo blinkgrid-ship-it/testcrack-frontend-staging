@@ -6,7 +6,7 @@ import { useState, useCallback } from 'react';
 import { callBackend } from './authClient';
 import { useToast } from '@/shared/hooks/use-toast';
 
-interface UseAuthenticatedApiOptions {
+ export interface UseAuthenticatedApiOptions {
   showErrorToast?: boolean;
   onError?: (error: Error) => void;
 }
