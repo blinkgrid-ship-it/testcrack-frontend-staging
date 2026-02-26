@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Zap, Settings, Play, Pause, ArrowLeft, 
   BrainCircuit, Briefcase, BookOpen, Activity, CheckCircle2,
@@ -19,7 +19,6 @@ interface Report {
   text: string;
 }
 
-// --- Mock Data ---
 const REPORTS: Record<Category, Report> = {
   tech: {
     title: "AI Infrastructure Investment Trends 2026",
@@ -45,38 +44,36 @@ const CATEGORIES: { id: Category; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function SpeedReading() {
-  // --- Layout State ---
   const [activeTab, setActiveTab] = useState("speed-reading");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // --- Speed Reading State ---
   const [view, setView] = useState<'dashboard' | 'reader'>('dashboard');
   const [activeCategory, setActiveCategory] = useState<Category>('tech');
   const [showSettings, setShowSettings] = useState(false);
   const [wpm, setWpm] = useState(400);
-
-  // --- Reader State ---
   const [words, setWords] = useState<string[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Initialize text when starting
-  const handleStartReading = () => {
+  const handleStartReading = useCallback(() => {
     const rawText = REPORTS[activeCategory].text;
     const wordArray = rawText.trim().split(/\s+/);
     setWords(wordArray);
     setCurrentWordIndex(0);
     setIsFinished(false);
     setView('reader');
-    // Small delay before auto-playing
-    setTimeout(() => {
-      setIsPlaying(true);
-    }, 500);
-  };
+    setTimeout(() => setIsPlaying(true), 500);
+  }, [activeCategory]);
 
-  // RSVP Interval Logic
+  const handleBack = useCallback((e?: React.MouseEvent) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    setIsPlaying(false);
+    setIsFinished(false);
+    setCurrentWordIndex(0);
+    setView('dashboard');
+  }, []);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isPlaying && !isFinished) {
@@ -95,21 +92,17 @@ export default function SpeedReading() {
     return () => clearInterval(interval);
   }, [isPlaying, wpm, words.length, isFinished]);
 
-  // Optimal Recognition Point (ORP) Helper
   const renderWord = (word: string) => {
     if (!word) return null;
-    
     const pivot = Math.max(0, Math.ceil(word.length * 0.35) - 1);
-    
     const start = word.substring(0, pivot);
     const mid = word.substring(pivot, pivot + 1);
     const end = word.substring(pivot + 1);
-
     return (
       <div className="flex items-center text-4xl md:text-6xl font-medium tracking-wide">
-        <span className="text-slate-400 dark:text-gray-300 text-right w-[150px] md:w-[250px] transition-colors">{start}</span>
+        <span className="text-slate-800 dark:text-gray-100 text-right w-[120px] md:w-[250px]">{start}</span>
         <span className="text-red-500 w-[20px] md:w-[30px] text-center">{mid}</span>
-        <span className="text-slate-400 dark:text-gray-300 text-left w-[150px] md:w-[250px] transition-colors">{end}</span>
+        <span className="text-slate-800 dark:text-gray-100 text-left w-[120px] md:w-[250px]">{end}</span>
       </div>
     );
   };
@@ -120,241 +113,126 @@ export default function SpeedReading() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-      
-      {/* Sidebar */}
       <StudentSidebar 
-        activeTab={activeTab} 
+        activeTab='speed'
         onTabChange={setActiveTab} 
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      {/* Main Content Wrapper */}
       <div className={`min-h-screen flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
-        
-        {/* Topbar */}
         <StudentTopbar onUpgradeClick={() => setShowPremiumModal(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 flex justify-center items-start">
           <div className="w-full max-w-5xl">
-            
-            {/* --- DASHBOARD VIEW --- */}
-            {view === 'dashboard' && (
-              <div className="w-full mt-4 bg-white dark:bg-[#121118] text-slate-900 dark:text-white border border-slate-200 dark:border-gray-800 rounded-2xl p-8 relative overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-300">
+            {view === 'dashboard' ? (
+              <div className="w-full mt-4 bg-white dark:bg-[#121118] text-slate-900 dark:text-white border border-slate-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 relative overflow-hidden">
                 <Zap className="absolute -top-10 -right-10 text-purple-500/10 dark:text-purple-900/20" size={240} strokeWidth={1} />
-                
                 <div className="relative z-10">
-                  <div className="inline-flex items-center space-x-2 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold mb-6 transition-colors">
+                  <div className="inline-flex items-center space-x-2 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold mb-6">
                     <Zap size={14} />
                     <span>RSVP • Contextual Priming</span>
                   </div>
-
-                  <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-                    Read a Full Report in<br />
-                    <span className="text-purple-600 dark:text-purple-400">15 Minutes</span> with 90% Retention
-                  </h1>
+                  <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">Read a Full Report in<br /><span className="text-purple-600 dark:text-purple-400">15 Minutes</span> with 90% Retention</h1>
+                  <p className="text-slate-600 dark:text-gray-400 max-w-2xl mb-8 text-sm md:text-base">Rapid Serial Visual Presentation flashes words at 200-800 WPM calibrated to your comprehension.</p>
                   
-                  <p className="text-slate-600 dark:text-gray-400 max-w-2xl mb-8 text-sm md:text-base leading-relaxed transition-colors">
-                    Rapid Serial Visual Presentation flashes words at <strong className="text-slate-900 dark:text-gray-200">200-800 WPM</strong> calibrated to your comprehension. Content is curated from real-time market reports matched to your interests.
-                  </p>
-
-                  {/* Categories */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     {CATEGORIES.map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setActiveCategory(cat.id)}
-                        className={`flex items-center px-4 py-2 rounded-md text-sm transition-all ${
-                          activeCategory === cat.id 
-                            ? 'bg-purple-600 text-white shadow-md' 
-                            : 'bg-transparent text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800'
-                        }`}
-                      >
-                        {cat.icon}
-                        {cat.label}
+                      <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`flex items-center px-4 py-2 rounded-md text-sm transition-all ${activeCategory === cat.id ? 'bg-purple-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-800'}`}>
+                        {cat.icon}{cat.label}
                       </button>
                     ))}
                   </div>
 
-                  {/* Active Report Card */}
-                  <div className="bg-slate-50 dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700/50 rounded-xl p-5 mb-8 w-full max-w-md transition-colors duration-300">
-                    <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-1 tracking-wider uppercase">
-                      {REPORTS[activeCategory].source}
-                    </p>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 transition-colors">
-                      {REPORTS[activeCategory].title}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-gray-500 transition-colors">
-                      {REPORTS[activeCategory].text.split(' ').length} words • ~{Math.ceil(REPORTS[activeCategory].text.split(' ').length / wpm)} min at {wpm} WPM
-                    </p>
+                  <div className="bg-slate-50 dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700/50 rounded-xl p-5 mb-8 w-full max-w-md">
+                    <p className="text-xs text-purple-600 font-semibold mb-1 tracking-wider uppercase">{REPORTS[activeCategory].source}</p>
+                    <h3 className="text-lg font-semibold mb-2">{REPORTS[activeCategory].title}</h3>
+                    <p className="text-xs text-slate-500">{REPORTS[activeCategory].text.split(' ').length} words • ~{Math.ceil(REPORTS[activeCategory].text.split(' ').length / wpm)} min</p>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                    <button 
-                      onClick={handleStartReading}
-                      className="flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 dark:hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full sm:w-auto shadow-md"
-                    >
-                      <Play size={18} fill="currentColor" />
-                      <span>Start Speed Reading</span>
-                    </button>
-                    
-                    <button 
-                      onClick={() => setShowSettings(!showSettings)}
-                      className="flex items-center justify-center space-x-2 bg-white dark:bg-[#1C1A24] hover:bg-slate-50 dark:hover:bg-gray-700 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-white px-6 py-3 rounded-lg font-medium transition-colors w-full sm:w-auto shadow-sm"
-                    >
-                      <Settings size={18} />
-                      <span>Settings</span>
-                    </button>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button onClick={handleStartReading} className="flex items-center justify-center space-x-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-medium shadow-md w-full sm:w-auto"><Play size={18} fill="currentColor" /><span>Start Speed Reading</span></button>
+                    <button onClick={() => setShowSettings(!showSettings)} className="flex items-center justify-center space-x-2 bg-white dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700 px-6 py-3 rounded-lg font-medium w-full sm:w-auto"><Settings size={18} /><span>Settings</span></button>
                   </div>
-
-                  {/* Collapsible Settings Dropdown */}
-                  {showSettings && (
-                    <div className="mt-4 p-5 bg-white dark:bg-[#1C1A24] border border-slate-200 dark:border-gray-700 rounded-xl max-w-md animate-in slide-in-from-top-2 fade-in transition-colors duration-300 shadow-lg">
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-sm font-medium text-slate-700 dark:text-gray-300">Base Speed (WPM)</span>
-                        <span className="text-purple-600 dark:text-purple-400 font-bold">{wpm} WPM</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="200" max="800" step="25"
-                        value={wpm}
-                        onChange={(e) => setWpm(Number(e.target.value))}
-                        className="w-full h-2 bg-slate-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600 dark:accent-purple-500"
-                      />
-                      <div className="flex justify-between text-xs text-slate-500 dark:text-gray-500 mt-2">
-                        <span>200 (Relaxed)</span>
-                        <span>500 (Standard)</span>
-                        <span>800 (Elite)</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
-            )}
-
-            {/* --- READER VIEW --- */}
-            {view === 'reader' && (
-              <div className="w-full flex flex-col h-[75vh] min-h-[600px] justify-between text-slate-900 dark:text-white transition-colors duration-300">
+            ) : (
+              <div className="w-full flex flex-col h-auto md:h-[75vh] min-h-[500px] justify-between text-slate-900 dark:text-white">
                 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl shadow-sm dark:shadow-md transition-colors duration-300">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">{REPORTS[activeCategory].title}</h2>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{REPORTS[activeCategory].source}</p>
+                {/* --- RESPONSIVE HEADER --- */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-6 rounded-xl shadow-sm">
+                  <div className="text-center md:text-left w-full md:w-auto">
+                    <h2 className="text-lg font-bold truncate max-w-[280px] md:max-w-md mx-auto md:mx-0">{REPORTS[activeCategory].title}</h2>
+                    <p className="text-xs text-slate-500">{REPORTS[activeCategory].source}</p>
                   </div>
 
-                  <div className="flex items-center space-x-6 w-full md:w-auto">
-                    {/* Speed Slider in Header */}
-                    <div className="flex items-center space-x-3 flex-1 md:flex-none">
-                      <span className="text-xs text-slate-500 dark:text-gray-400 font-semibold tracking-wider">SPEED</span>
+                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                    <div className="flex items-center space-x-3 w-full sm:w-auto justify-center">
+                      <span className="text-[10px] text-slate-500 font-bold tracking-widest">SPEED</span>
                       <input 
-                        type="range" 
-                        min="200" max="800" step="25"
-                        value={wpm}
+                        type="range" min="200" max="800" step="25" value={wpm}
                         onChange={(e) => setWpm(Number(e.target.value))}
-                        className="w-32 h-1 bg-slate-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600 dark:accent-purple-500"
+                        className="w-full sm:w-32 h-1.5 bg-slate-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
                       />
-                      <span className="text-xs text-slate-900 dark:text-white font-medium w-16 text-right transition-colors">{wpm} WPM</span>
+                      <span className="text-xs font-bold w-12">{wpm}</span>
                     </div>
 
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => { setIsPlaying(false); setView('dashboard'); }}
-                        className="flex items-center space-x-1 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-white text-sm transition-colors"
-                      >
-                        <ArrowLeft size={16} />
-                        <span>Back</span>
-                      </button>
-                      <button 
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className={`flex items-center space-x-1 px-4 py-1.5 rounded text-sm transition-colors shadow-sm ${isPlaying ? 'bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-white' : 'bg-purple-600 hover:bg-purple-700 dark:hover:bg-purple-500 text-white'}`}
-                      >
-                        {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
-                        <span>{isPlaying ? 'Pause' : 'Resume'}</span>
-                      </button>
+                    <div className="flex space-x-2 w-full sm:w-auto justify-center">
+                      <button onClick={handleBack} className="flex-1 sm:flex-none flex items-center justify-center space-x-1 px-4 py-2 rounded bg-slate-100 dark:bg-gray-800 text-sm font-medium"><ArrowLeft size={16} /><span>Back</span></button>
+                      {!isFinished && (
+                        <button onClick={() => setIsPlaying(!isPlaying)} className={`flex-1 sm:flex-none flex items-center justify-center space-x-1 px-4 py-2 rounded text-sm font-medium ${isPlaying ? 'bg-slate-100 dark:bg-gray-800' : 'bg-purple-600 text-white'}`}>
+                          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                          <span>{isPlaying ? 'Pause' : 'Resume'}</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* RSVP Display Area */}
-                <div className="flex-1 my-6 bg-white dark:bg-[#0B0A0F] border border-slate-200 dark:border-gray-800 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden shadow-inner transition-colors duration-300">
-                  {/* Focus lines */}
+                <div className="flex-1 my-6 bg-white dark:bg-[#0B0A0F] border border-slate-200 dark:border-gray-800 rounded-2xl flex flex-col items-center justify-center relative min-h-[300px] shadow-inner">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[2px] h-12 bg-slate-300 dark:bg-gray-800/50 -mt-6"></div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[2px] h-12 bg-slate-300 dark:bg-gray-800/50 mt-6"></div>
-
                   {isFinished ? (
-                    <div className="text-center animate-in zoom-in-95 duration-500">
-                      <div className="text-6xl md:text-8xl font-bold text-slate-900 dark:text-white mb-4 transition-colors">83%</div>
-                      <div className="text-xl text-purple-600 dark:text-purple-400 font-medium mb-2">Estimated Retention</div>
-                      <p className="text-slate-500 dark:text-gray-500">{words.length} words read at {wpm} WPM</p>
+                    <div className="text-center animate-in zoom-in-95">
+                      <div className="text-6xl md:text-8xl font-bold mb-4">83%</div>
+                      <div className="text-xl text-purple-600 font-medium">Estimated Retention</div>
                     </div>
-                  ) : (
-                    renderWord(words[currentWordIndex])
-                  )}
+                  ) : renderWord(words[currentWordIndex])}
                 </div>
 
-                {/* Footer Stats & Progress */}
+                {/* Footer Metrics */}
                 <div className="space-y-4">
-                  {/* Progress Bar */}
                   <div className="flex items-center space-x-4">
-                    <span className="text-xs text-slate-500 dark:text-gray-500 w-16">Progress</span>
                     <div className="flex-1 h-2 bg-slate-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-purple-600 transition-all duration-150 ease-linear"
-                        style={{ width: `${progressPercentage}%` }}
-                      />
+                      <div className="h-full bg-purple-600 transition-all duration-150" style={{ width: `${progressPercentage}%` }} />
                     </div>
-                    <span className="text-xs text-slate-500 dark:text-gray-500 w-24 text-right">
-                      {currentWordIndex + (isFinished ? 1 : 0)} / {words.length} words
-                    </span>
+                    <span className="text-xs text-slate-500 whitespace-nowrap">{currentWordIndex + (isFinished ? 1 : 0)} / {words.length}</span>
                   </div>
 
-                  {/* Metrics Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center text-center shadow-sm dark:shadow-md transition-colors duration-300">
-                      <Activity size={20} className="text-purple-500 mb-2" />
-                      <span className="text-2xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">{wpm}</span>
-                      <span className="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wider">Current WPM</span>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center">
+                      <Activity size={18} className="text-purple-500 mb-2" /><span className="text-xl font-bold">{wpm}</span><span className="text-[10px] text-slate-500 uppercase">Current WPM</span>
                     </div>
-                    
-                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center text-center shadow-sm dark:shadow-md transition-colors duration-300">
-                      <Hash size={20} className="text-green-500 mb-2" />
-                      <span className="text-2xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">{currentWordIndex + (isFinished ? 1 : 0)}</span>
-                      <span className="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wider">Words Read</span>
+                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center">
+                      <Hash size={18} className="text-green-500 mb-2" /><span className="text-xl font-bold">{currentWordIndex + (isFinished ? 1 : 0)}</span><span className="text-[10px] text-slate-500 uppercase">Words Read</span>
                     </div>
-
-                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center text-center shadow-sm dark:shadow-md transition-colors duration-300">
-                      {CATEGORIES.find(c => c.id === activeCategory)?.icon || <BrainCircuit size={20} className="text-orange-500 mb-2" />}
-                      <span className="text-lg font-bold text-slate-900 dark:text-white mb-1 truncate w-full transition-colors">{CATEGORIES.find(c => c.id === activeCategory)?.label}</span>
-                      <span className="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wider">Interest</span>
+                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center text-center">
+                      <BrainCircuit size={18} className="text-orange-500 mb-2" /><span className="text-sm font-bold truncate w-full">{CATEGORIES.find(c => c.id === activeCategory)?.label}</span><span className="text-[10px] text-slate-500 uppercase">Interest</span>
                     </div>
-
-                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center text-center shadow-sm dark:shadow-md transition-colors duration-300">
-                      {isFinished ? (
-                        <CheckCircle2 size={20} className="text-blue-500 mb-2" />
-                      ) : (
-                        <Clock size={20} className="text-blue-500 mb-2" />
-                      )}
-                      <span className="text-lg font-bold text-slate-900 dark:text-white mb-1 transition-colors">
-                        {isFinished ? '83%' : 'In progress'}
-                      </span>
-                      <span className="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-wider">Retention</span>
+                    <div className="bg-white dark:bg-[#121118] border border-slate-200 dark:border-gray-800 p-4 rounded-xl flex flex-col items-center">
+                      {isFinished ? <CheckCircle2 size={18} className="text-blue-500 mb-2" /> : <Clock size={18} className="text-blue-500 mb-2" />}
+                      <span className="text-sm font-bold">{isFinished ? '83%' : 'In progress'}</span><span className="text-[10px] text-slate-500 uppercase">Retention</span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-            
           </div>
         </main>
       </div>
 
-      {/* Global Modals */}
-      <PremiumModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
+      <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
     </div>
   );
 }
